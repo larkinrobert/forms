@@ -1,0 +1,30 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: s3
+
+Parameters:
+
+  snsArn:
+    Type: String
+    Default: false
+
+  s3CloudformationsBucket:
+    Type: String
+    Default: false
+
+Resources:
+    
+  s3:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: AuthenticatedRead
+      NotificationConfiguration:
+        TopicConfigurations:
+          - 
+            Event: "s3:ObjectCreated:*"
+            Topic: !Ref snsArn
+Outputs:
+  s3Name:
+    Value: !Ref s3
+  snsArn:
+    Value: !Ref snsArn

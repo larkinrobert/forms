@@ -1,0 +1,38 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: lambda
+Parameters:
+  roleArn:
+    Type: String
+  MemorySize:
+    Type: String
+    Default: 1024
+  ZipFile:
+    Type: String
+    Default: console.log("hello world")
+  Mode:
+    Type: String
+    Default: Active
+  Timeout:
+    Type: String
+    Default: 25
+
+Resources:
+  lambda:
+    Type: "AWS::Lambda::Function" 
+    Properties:
+      Handler: "index.handler"
+      MemorySize: !Ref MemorySize
+      Code:
+        ZipFile: !Ref ZipFile
+      Role: !Ref roleArn
+      Runtime: "nodejs6.10"
+      Timeout: !Ref Timeout
+      TracingConfig:
+        Mode: !Ref Mode
+
+Outputs:
+  lambdaArn:
+    Value: !GetAtt lambda.Arn
+  lambdaName:
+    Value: !Ref lambda

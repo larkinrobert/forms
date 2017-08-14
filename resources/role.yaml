@@ -1,0 +1,44 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: role
+
+Parameters:
+  roleServiceList:
+    Type: CommaDelimitedList
+  policyActionList:
+    Type: CommaDelimitedList
+
+Resources:
+  role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal: 
+              Service:
+                !Ref roleServiceList
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: !Ref "AWS::StackName"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: 
+                  !Ref policyActionList
+                Resource: "*"
+
+Outputs:
+  roleArn:
+    Value: !GetAtt role.Arn
+  roleName:
+    Value: !Ref role
+  policyName:
+    Value: !Ref "AWS::StackName"

@@ -1,0 +1,60 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: dynamodb
+Parameters:
+
+  primaryKey:
+    Type: String
+    Default: "false"
+
+  primaryKeyType:
+    Type: String
+    Default: "false"
+
+  secondaryKey:
+    Type: String
+    Default: "false"
+
+  secondaryKeyType:
+    Type: String
+    Default: "false"
+
+  secondaryIndexName:
+    Type: String
+    Default: "false"
+
+Resources:
+
+  dynamodb:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: !Ref primaryKey
+          AttributeType: !Ref primaryKeyType
+        -
+          AttributeName: !Ref secondaryKey
+          AttributeType: !Ref secondaryKeyType
+      KeySchema:
+        -
+          AttributeName: !Ref primaryKey
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - 
+          IndexName: !Ref secondaryIndexName
+          KeySchema: 
+            - 
+              AttributeName: !Ref secondaryKey
+              KeyType: HASH
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+Outputs:
+  dynamodbName:
+    Value: !Ref dynamodb

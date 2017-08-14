@@ -1,0 +1,105 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: codeBuild
+Parameters:
+
+  s3Deploy:
+    Type: String
+    Default: "false"
+
+  gitHubRepoUrl:
+    Type: String
+    Default: "false"
+
+  gitHubRepoName:
+    Type: String
+    Default: "false"
+
+  gitHubProjectName:
+    Type: String
+    Default: "false"
+
+  roleArn:
+    Type: String
+    Default: "false"
+
+  stackName:
+    Type: String
+    Default: "false"
+
+Conditions:
+
+  useGitHubName: 
+    !Not
+      - !Equals [!Ref gitHubRepoName, "false"]
+  useStackName: 
+    !And
+      - !Not
+        - !Equals [!Ref stackName, "false"]
+      - !Equals [!Ref gitHubRepoName, "false"]
+# Know there is a better way of doing this, but Location was 
+# giving errors when using !If... going to circle back later.
+Resources:
+
+  codeBuildWantsAUniqueRole:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/cloudformations-014066636401/cloudformations/resources/role.yaml"
+      TimeoutInMinutes: 2
+      Parameters:
+        roleServiceList: "codebuild.amazonaws.com"
+        policyActionList: "ec2:*,xray:*,lambda:*,dynamodb:*,apigateway:*,s3:*,codebuild:*,logs:*,sns:*,ses:*" 
+
+  !Join ['', ["deploy", !Ref gitHubRepoName]]:
+    Condition: useGitHubName
+    Type: AWS::CodeBuild::Project
+    Properties:
+      ServiceRole: !Ref roleArn
+      Artifacts:
+        Type: S3
+        Location: !Ref s3Deploy
+        Packaging: NONE
+      Environment:
+        Type: linuxContainer
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/nodejs:6.3.1"
+      Source:
+        Location: !Join ["", [!Ref gitHubRepoUrl, "/", !Ref gitHubProjectName, "/", !Ref gitHubRepoName, ".git"]]
+        Type: GITHUB
+      TimeoutInMinutes: 10
+
+  !Join ['', ["deploy", !Ref stackName]]:
+    Condition: useStackName
+    Type: AWS::CodeBuild::Project
+    Properties:
+      ServiceRole: !Ref roleArn
+      Artifacts:
+        Type: S3
+        Location: !Ref s3Deploy
+        Packaging: NONE
+       #Name: !Join ["", ["deploy-", !Ref useStackName, ".zip"]]
+      Environment:
+        Type: linuxContainer
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/nodejs:6.3.1"
+      Source:
+        Location: !Join ["", [!Ref gitHubRepoUrl, "/", !Ref gitHubProjectName, "/", !Ref stackName, ".git"]]
+        Type: GITHUB
+      TimeoutInMinutes: 10
+
+Outputs:
+  codeBuildArn:
+    Value: !If [useStackName, !GetAtt codeBuildStackName.Arn, !GetAtt codeBuildGitHubRepoName.Arn]
+  codeBuildName:
+    Value: !If [useStackName, !Ref codeBuildStackName, !Join ['', ["deploy", !Ref gitHubRepoName]]]
+  artifactFileName:
+    Value: !Join ["", ["deploy-", !Ref gitHubRepoName, ".zip"]]
+  gitHubRepoUrl:
+    Value: !Ref gitHubRepoUrl
+  gitHubRepoName:
+    Value: !Ref gitHubRepoName
+  gitHubProjectName:
+    Value: !Ref gitHubProjectName
+  stackName:
+    Value: !Ref stackName
+

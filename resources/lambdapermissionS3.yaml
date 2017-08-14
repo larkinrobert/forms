@@ -1,0 +1,16 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: lambda permissions
+Parameters:
+  lambdaArn:
+    Type: String
+
+Resources:
+  lambdaPermissionsS3:
+    Type: "AWS::Lambda::Permission"  
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref lambdaArn
+      Principal: "s3.amazonaws.com"
+      SourceAccount: !Ref "AWS::AccountId"
+  

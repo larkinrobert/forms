@@ -1,0 +1,53 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: sns
+Parameters:
+
+  sqsArn:
+    Type: String
+    Default: "false"
+
+  lambdaArn:
+    Type: String
+    Default: "false"
+
+  lambdaName:
+    Type: String
+    Default: "false"
+    
+Resources:
+  sns:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      DisplayName: !Ref lambdaName
+      Subscription:
+        -
+          Endpoint: !Ref sqsArn
+          Protocol: sqs
+        - 
+          Endpoint: !Ref lambdaArn
+          Protocol: lambda
+  snsPolicy:
+    DependsOn:
+      - sns
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument: 
+        Id: s3TopicPolicy
+        Version: '2012-10-17'
+        Statement:
+          - 
+            Sid: s3TopicPolicy
+            Effect: Allow
+            Principal: 
+             Service: "s3.amazonaws.com"
+            Action: sns:Publish
+            Resource: !Ref sns
+      Topics:
+        - !Ref sns 
+
+Outputs:
+  snsArn:
+    Value: !Ref sns
+  snsName:
+    Value: !GetAtt sns.TopicName

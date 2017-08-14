@@ -1,0 +1,12 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: logGroup
+
+Resources:
+ 
+  logGroup:
+    Type: "AWS::Logs::LogGroup"
+
+Outputs:
+  logGroupName:
+    Value: !Ref logGroup

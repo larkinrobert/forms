@@ -1,0 +1,24 @@
+
+version: 0.2
+
+env:
+  variables:
+    repoName: "cloudformations"
+            
+phases:
+  install:
+    commands:
+      - echo "install command"
+  pre_build:
+    commands:
+       - echo "pre build command"
+  build:
+    commands:
+      - echo "build command"
+  post_build:
+    commands:
+      - echo "post_build command"
+artifacts:
+  files:
+    - 'resources/*'
+    - 'templates/*'

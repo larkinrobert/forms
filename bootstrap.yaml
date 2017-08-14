@@ -1,0 +1,118 @@
+---
+
+
+
+
+
+# THIS IS ONLY USED TO BOOTSTRAP THE CLOUDFORMATIONS UPDATE APPLICATION
+# AFTER IT IS RAN IN THE AWS ACCOUNT, IT DOES NOT NEED TO BE RUN AGAIN
+
+
+
+
+
+
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: cloudformations
+Parameters:
+
+  repoName:
+    Type: String
+    Default: cloudformations
+  project:
+    Type: String
+    Default: sans
+
+Description: > 
+  cloudformations bootstrap
+
+Resources:
+  Role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Join ["", [!Ref project, "-",!Ref repoName, "-role"]]
+      AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Effect: "Allow"
+              Principal: 
+                Service:
+                  - "codebuild.amazonaws.com"
+              Action: 
+                - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: !Join ["", [!Ref project, "-",!Ref repoName, "-policy"]]
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: 
+                  - "xray:*"
+                  - "codebuild:*"
+                  - "logs:*"
+                  - "s3:*"
+                Resource: "*"
+  LogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Join ["", ["/aws/lambda/", !Ref repoName]]
+      
+  S3:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Join ["", [!Ref repoName, "-", !Ref "AWS::AccountId"]]
+
+  s3policy:
+    Type: "AWS::S3::BucketPolicy"
+    DependsOn:
+      - S3
+    Properties:
+      Bucket: !Ref S3
+      PolicyDocument:
+        Statement:
+          -
+            Sid: "AllowPublicRead"
+            Action:
+              - "s3:GetObject"
+            Effect: Allow
+            Resource: 
+             - !Join ["", ["arn:aws:s3:::", !Ref S3, "/*"]]
+             - !Join ["", ["arn:aws:s3:::", !Ref S3]]
+            Principal:
+              AWS: "*"
+          -
+            Principal: 
+              AWS: !Join ["", ["arn:aws:iam::", !Ref "AWS::AccountId", ":root" ]]
+            Action:
+              - "s3:*"
+            Effect: Allow
+            Resource: 
+             - !Join ["", ["arn:aws:s3:::", !Ref S3, "/*"]]
+             - !Join ["", ["arn:aws:s3:::", !Ref S3]]
+    
+  CodeBuild:
+    DependsOn:
+      - Role
+      - S3
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref repoName
+      Description: !Ref repoName
+      ServiceRole: !Join ["", ["arn:aws:iam::", !Ref "AWS::AccountId", ":role/",!Ref project, "-", !Ref repoName, "-role"]]
+      Artifacts:
+        Type: S3
+        Location: !Join ["", [!Ref repoName, "-", !Ref "AWS::AccountId"]]
+      Environment:
+        Type: linuxContainer
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/nodejs:6.3.1"
+      Source:
+        Location: !Join ["", ["https://github.com/anabam/",!Ref repoName,".git"]]
+        Type: GITHUB
+      TimeoutInMinutes: 10

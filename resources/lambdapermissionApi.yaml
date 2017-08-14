@@ -1,0 +1,15 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: lambda permissions
+Parameters:
+  lambdaArn:
+     Type: String
+
+Resources:
+  lambdaPermissionsApi:
+    Type: "AWS::Lambda::Permission"  
+    Properties:
+      Action: "lambda:*"
+      FunctionName: !Ref lambdaArn
+      Principal: "apigateway.amazonaws.com"
+      #SourceArn: !Join ["". ["arn:aws:execute-api:",!Ref AWS::Region, ":", !Ref AWS::AccountId,":",!/Ref apiArn, "/*/*/*"]]
