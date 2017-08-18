@@ -12,14 +12,14 @@ Parameters:
     Default: "false"
   cloudformationsBucket:
     Type: String
-    Default: cloudformations-014066636401/microservice_template
+    Default: deploy-forms-014066636401/microservice_template
 
 Resources:
 
   role:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-", !Ref awsAccountId, "/deploy/resources/role.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/role.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         'Fn::Transform':
@@ -30,13 +30,13 @@ Resources:
   loggroup:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-", !Ref awsAccountId,"/deploy/resources/loggroup.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/loggroup.yaml"]]
       TimeoutInMinutes: 2
 
   dynamodb:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/dynamodb.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/dynamodb.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         'Fn::Transform':
@@ -47,7 +47,7 @@ Resources:
   sqs:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/sqs.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/sqs.yaml"]]
       TimeoutInMinutes: 2
 
   sns:
@@ -57,7 +57,7 @@ Resources:
       - role
       - lambdaPermissionS3
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/sns.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/sns.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         sqsArn:
@@ -73,7 +73,7 @@ Resources:
     DependsOn:
       - sns
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/s3.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         snsArn:
@@ -84,7 +84,7 @@ Resources:
     DependsOn:
       - sns
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/s3.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         snsArn:
@@ -95,7 +95,7 @@ Resources:
     DependsOn:
       - sns
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/s3.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         snsArn:
@@ -108,7 +108,7 @@ Resources:
       - role
       - loggroup
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/codebuild.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/codebuild.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         s3Deploy:
@@ -126,7 +126,7 @@ Resources:
     DependsOn:
       - role
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/lambda.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/lambda.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         roleArn:
@@ -145,7 +145,7 @@ Resources:
     DependsOn:
       - lambda
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/lambdapermissionS3.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/lambdapermissionS3.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         lambdaArn:
@@ -156,7 +156,7 @@ Resources:
     DependsOn:
       - lambda
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/lambdapermissionApi.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/lambdapermissionApi.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         lambdaArn:
@@ -166,7 +166,7 @@ Resources:
     DependsOn:
       - lambdaPermissionApi
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/api.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/api.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         lambdaArn:
