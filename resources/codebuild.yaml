@@ -44,7 +44,7 @@ Resources:
   codeBuildWantsAUniqueRole:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: "https://s3.amazonaws.com/cloudformations-014066636401/cloudformations/resources/role.yaml"
+      TemplateURL: "https://s3.amazonaws.com/deploy-forms-larkin/forms/resources/role.yaml"
       TimeoutInMinutes: 2
       Parameters:
         roleServiceList: "codebuild.amazonaws.com"
