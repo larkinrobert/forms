@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  Type: "AWS::CloudFormation::WaitConditionHandle"
+  Properties:
+
+Outputs:
+  Nothing:
+    "Description": "Empty",
+    "Value": ""

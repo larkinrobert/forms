@@ -1,0 +1,235 @@
+
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A Blue Stack Application
+
+Parameters:
+  awsAccountId:
+    Type: String
+    Default: "014066636401"
+  init:
+    Type: String
+    Default: "false"
+  cloudformationsBucket:
+    Type: String
+    Default: cloudformations-014066636401/microservice_template
+
+Resources:
+
+  role:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-", !Ref awsAccountId, "/deploy/resources/role.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: !Join ["", ["s3://",!Ref cloudformationsBucket, "/deploy/transforms/role.yaml"]]
+
+  loggroup:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-", !Ref awsAccountId,"/deploy/resources/loggroup.yaml"]]
+      TimeoutInMinutes: 2
+
+  dynamodb:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/dynamodb.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: !Join ["", ["s3://",!Ref cloudformationsBucket, "/deploy/transforms/dynamodb.yaml"]]
+
+  sqs:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/sqs.yaml"]]
+      TimeoutInMinutes: 2
+
+  sns:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - sqs
+      - role
+      - lambdaPermissionS3
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/sns.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        sqsArn:
+          Fn::GetAtt: [sqs, Outputs.sqsArn]
+        lambdaArn:
+          Fn::GetAtt: [lambda, Outputs.lambdaArn]
+        lambdaName:
+          Fn::GetAtt: [lambda, Outputs.lambdaName]
+#This is where templating is needed to do correctly:
+  # for s3 in ['deploy, assets, upload']
+  s3Deploy:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - sns
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        snsArn:
+          Fn::GetAtt: [sns, Outputs.snsArn]
+
+  s3Assets:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - sns
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        snsArn:
+          Fn::GetAtt: [sns, Outputs.snsArn]
+
+  s3Upload:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - sns
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        snsArn:
+          Fn::GetAtt: [sns, Outputs.snsArn]
+
+  codebuild:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - s3Deploy
+      - role
+      - loggroup
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/codebuild.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        s3Deploy:
+          Fn::GetAtt: [s3Deploy, Outputs.s3Name]
+        roleArn:
+          Fn::GetAtt: [role, Outputs.roleArn]
+        stackName: !Ref "AWS::StackName"
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: !Join ["", ["s3://",!Ref cloudformationsBucket, "/deploy/transforms/codebuild.yaml"]]
+
+  lambda:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - role
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/lambda.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        roleArn:
+          Fn::GetAtt: [role, Outputs.roleArn]
+      # Properties in these transform files could be read in from an external .yaml file that is
+      # managed by the developer.. but since we are not using a programtic/templated
+      # design, that will not be possible. Reading these transforms in from a shared s3 bucket
+      # (like they are now) defeats the reason for having them. -sh
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: !Join ["", ["s3://",!Ref cloudformationsBucket, "/deploy/transforms/lambda.yaml"]]
+
+  lambdaPermissionS3:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - lambda
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/lambdapermissionS3.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        lambdaArn:
+          Fn::GetAtt: [lambda, Outputs.lambdaArn]
+
+  lambdaPermissionApi:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - lambda
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/lambdapermissionApi.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        lambdaArn:
+          Fn::GetAtt: [lambda, Outputs.lambdaArn]
+  api:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - lambdaPermissionApi
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/api.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        lambdaArn:
+          Fn::GetAtt: [lambda, Outputs.lambdaArn]
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: !Join ["", ["s3://",!Ref cloudformationsBucket, "/deploy/transforms/api.yaml"]]
+Outputs:
+  s3DeployName:
+    Value:
+      Fn::GetAtt: [s3Deploy, Outputs.s3Name]
+  s3AssetsName:
+    Value:
+      Fn::GetAtt: [s3Assets, Outputs.s3Name]
+  s3UploadName:
+    Value:
+      Fn::GetAtt: [s3Upload, Outputs.s3Name]
+  logGroupName:
+    Value:
+      Fn::GetAtt: [loggroup, Outputs.logGroupName]
+  roleName:
+    Value:
+      Fn::GetAtt: [role, Outputs.roleName]
+  roleArn:
+    Value:
+      Fn::GetAtt: [role, Outputs.roleArn]
+  lambdaArn:
+    Value:
+      Fn::GetAtt: [lambda, Outputs.lambdaArn]
+  lambdaName:
+    Value:
+      Fn::GetAtt: [lambda, Outputs.lambdaName]
+  apiName:
+    Value:
+      Fn::GetAtt: [api, Outputs.apiName]
+  sqsName:
+    Value:
+      Fn::GetAtt: [sqs, Outputs.sqsName]
+  snsName:
+    Value:
+      Fn::GetAtt: [sns, Outputs.snsName]
+  snsArn:
+    Value:
+      Fn::GetAtt: [sns, Outputs.snsArn]
+  dynamodbName:
+    Value:
+      Fn::GetAtt: [dynamodb, Outputs.dynamodbName]
+  codeBuild:
+    Value:
+      Fn::GetAtt: [codebuild, Outputs.codeBuildName]
+  codeBuildArn:
+    Value:
+      Fn::GetAtt: [codebuild, Outputs.codeBuildArn]
+  gitHubProjectName:
+    Value:
+      Fn::GetAtt: [codebuild, Outputs.gitHubProjectName]
+  gitHubRepoUrl:
+    Value:
+      Fn::GetAtt: [codebuild, Outputs.gitHubRepoUrl]
+  gitHubRepoName:
+    Value:
+      Fn::GetAtt: [codebuild, Outputs.gitHubRepoName]
+  artifactFileName:
+    Value:
+      Fn::GetAtt: [codebuild, Outputs.artifactFileName]
