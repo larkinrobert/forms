@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Resources:
-  Type: "AWS::CloudFormation::WaitConditionHandle"
-  Properties:
+  WaitOut:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
 
 Outputs:
   Nothing:
