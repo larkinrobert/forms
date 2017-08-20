@@ -59,7 +59,7 @@ Resources:
 
 Outputs:
   roleName:
-    Value: !role
+    Value: !Ref role
   roleArn:
     Value: !GetAtt role.Arn
   cwroleArn:
