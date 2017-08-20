@@ -59,6 +59,6 @@ Resources:
 
 Outputs:
   roleArn:
-    !Ref role
+    Value: !Ref role
   cwroleArn:
-    !Ref CloudWatchRole
+    Value: !Ref CloudWatchRole
