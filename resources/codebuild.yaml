@@ -39,7 +39,6 @@ Resources:
         policyActionList: "ec2:*,xray:*,lambda:*,dynamodb:*,apigateway:*,s3:*,codebuild:*,logs:*,sns:*,ses:*" 
 
   BuildProject:
-    Condition: useGitHubName
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Join ["", [!Ref gitHubRepoName, "build"]]
