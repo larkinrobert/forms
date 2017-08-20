@@ -59,6 +59,6 @@ Resources:
 
 Outputs:
   roleArn:
-    Value: !Ref role
+    Value: !GetAtt role.Arn
   cwroleArn:
-    Value: !Ref CloudWatchRole
+    Value: !GetAtt CloudWatchRole.Arn
