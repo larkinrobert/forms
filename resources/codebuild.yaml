@@ -27,18 +27,6 @@ Parameters:
     Type: String
     Default: "false"
 
-Conditions:
-
-  useGitHubName: 
-    !Not
-      - !Equals [!Ref gitHubRepoName, "false"]
-  useStackName: 
-    !And
-      - !Not
-        - !Equals [!Ref stackName, "false"]
-      - !Equals [!Ref gitHubRepoName, "false"]
-# Know there is a better way of doing this, but Location was 
-# giving errors when using !If... going to circle back later.
 Resources:
 
   codeBuildWantsAUniqueRole:
@@ -50,10 +38,11 @@ Resources:
         roleServiceList: "codebuild.amazonaws.com"
         policyActionList: "ec2:*,xray:*,lambda:*,dynamodb:*,apigateway:*,s3:*,codebuild:*,logs:*,sns:*,ses:*" 
 
-  !Join ['', ["deploy", !Ref gitHubRepoName]]:
+  BuildProject:
     Condition: useGitHubName
     Type: AWS::CodeBuild::Project
     Properties:
+      Name: !Join ["", [!Ref gitHubRepoName, "build"]]
       ServiceRole: !Ref roleArn
       Artifacts:
         Type: S3
@@ -68,30 +57,11 @@ Resources:
         Type: GITHUB
       TimeoutInMinutes: 10
 
-  !Join ['', ["deploy", !Ref stackName]]:
-    Condition: useStackName
-    Type: AWS::CodeBuild::Project
-    Properties:
-      ServiceRole: !Ref roleArn
-      Artifacts:
-        Type: S3
-        Location: !Ref s3Deploy
-        Packaging: NONE
-       #Name: !Join ["", ["deploy-", !Ref useStackName, ".zip"]]
-      Environment:
-        Type: linuxContainer
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: "aws/codebuild/nodejs:6.3.1"
-      Source:
-        Location: !Join ["", [!Ref gitHubRepoUrl, "/", !Ref gitHubProjectName, "/", !Ref stackName, ".git"]]
-        Type: GITHUB
-      TimeoutInMinutes: 10
-
 Outputs:
   codeBuildArn:
-    Value: !If [useStackName, !GetAtt codeBuildStackName.Arn, !GetAtt codeBuildGitHubRepoName.Arn]
+    Value: !GetAtt BuildProject.Arn
   codeBuildName:
-    Value: !If [useStackName, !Ref codeBuildStackName, !Join ['', ["deploy", !Ref gitHubRepoName]]]
+    Value: !Ref BuildProject
   artifactFileName:
     Value: !Join ["", ["deploy-", !Ref gitHubRepoName, ".zip"]]
   gitHubRepoUrl:
