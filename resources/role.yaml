@@ -56,3 +56,9 @@ Resources:
         "Fn::GetAtt":
           - CloudWatchRole
           - Arn
+
+Outputs:
+  roleArn:
+    !Ref role
+  cwroleArn:
+    !Ref CloudWatchRole
