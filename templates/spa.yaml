@@ -84,7 +84,7 @@ Resources:
     DependsOn:
       - sns
     Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/s3.yaml"]]
       TimeoutInMinutes: 2
       Parameters:
         snsArn:
