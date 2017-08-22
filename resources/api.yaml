@@ -243,11 +243,11 @@ Resources:
 Outputs:
   apiRootResourceId:
     Value: !GetAtt api.RootResourceId
-  apiName:#sed 's/Name/Id/'
+  apiName:
     Value: !Ref api
   apiMethodName:  
     Value: !Ref apiGatewayMethodOptions
-  apiResourceName:#sed 's/Name/Id/'
+  apiResourceName:
     Value: !Ref apiResource
   apiDeploymentName:  
     Value: !Ref apiDeployment
