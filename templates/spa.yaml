@@ -219,6 +219,12 @@ Outputs:
     Export:
       Name:
         Fn::Sub: ${AWS::StackName}-apiName
+  apiResourceName:
+    Value:
+      Fn::GetAtt: [api, Outputs.apiResourceName]
+    Export:
+      Name:
+        Fn::Sub: $(AWS::StackName}-apiResourceName
   sqsName:
     Value:
       Fn::GetAtt: [sqs, Outputs.sqsName]
