@@ -14,7 +14,6 @@ Parameters:
     Type: String
     Default: dev
 
-
 Resources:
 
   role:
@@ -70,17 +69,6 @@ Resources:
 #This is where templating is needed to do correctly:
   # for s3 in ['deploy, assets, upload']
   s3Deploy:
-    Type: "AWS::CloudFormation::Stack"
-    DependsOn:
-      - sns
-    Properties:
-      TemplateURL: !Join ["", ["https://s3.amazonaws.com/deploy-forms-larkin", "/forms/resources/s3.yaml"]]
-      TimeoutInMinutes: 2
-      Parameters:
-        snsArn:
-          Fn::GetAtt: [sns, Outputs.snsArn]
-
-  s3Assets:
     Type: "AWS::CloudFormation::Stack"
     DependsOn:
       - sns
