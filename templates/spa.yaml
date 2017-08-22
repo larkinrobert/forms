@@ -79,6 +79,17 @@ Resources:
         snsArn:
           Fn::GetAtt: [sns, Outputs.snsArn]
 
+  s3Assets:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - sns
+    Properties:
+      TemplateURL: !Join ["", ["https://s3.amazonaws.com/cloudformations-",!Ref awsAccountId,"/deploy/resources/s3.yaml"]]
+      TimeoutInMinutes: 2
+      Parameters:
+        snsArn:
+          Fn::GetAtt: [sns, Outputs.snsArn]
+
   s3Upload:
     Type: "AWS::CloudFormation::Stack"
     DependsOn:
