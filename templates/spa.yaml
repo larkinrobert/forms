@@ -1,18 +1,19 @@
 
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: A Blue Stack Application
+Description: SPA Atom
 
 Parameters:
   awsAccountId:
     Type: String
     Default: "014066636401"
-  init:
-    Type: String
-    Default: "false"
   cloudformationsBucket:
     Type: String
     Default: deploy-forms-014066636401/microservice_template
+  deploymentStage:
+    Type: String
+    Default: dev
+
 
 Resources:
 
@@ -179,57 +180,114 @@ Outputs:
   s3DeployName:
     Value:
       Fn::GetAtt: [s3Deploy, Outputs.s3Name]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-s3DeployName
   s3AssetsName:
     Value:
       Fn::GetAtt: [s3Assets, Outputs.s3Name]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-s3AssetsName
   s3UploadName:
     Value:
       Fn::GetAtt: [s3Upload, Outputs.s3Name]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-s3UploadName
   logGroupName:
     Value:
       Fn::GetAtt: [loggroup, Outputs.logGroupName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-logGroupName
   roleName:
     Value:
       Fn::GetAtt: [role, Outputs.roleName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-roleName
   roleArn:
     Value:
       Fn::GetAtt: [role, Outputs.roleArn]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-roleArn
   lambdaArn:
     Value:
       Fn::GetAtt: [lambda, Outputs.lambdaArn]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-lambdaArn
   lambdaName:
     Value:
       Fn::GetAtt: [lambda, Outputs.lambdaName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-lambdaName
   apiName:
     Value:
       Fn::GetAtt: [api, Outputs.apiName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-apiName
   sqsName:
     Value:
       Fn::GetAtt: [sqs, Outputs.sqsName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-sqsName
   snsName:
     Value:
       Fn::GetAtt: [sns, Outputs.snsName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-snsName
   snsArn:
     Value:
       Fn::GetAtt: [sns, Outputs.snsArn]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-snsArn
   dynamodbName:
     Value:
       Fn::GetAtt: [dynamodb, Outputs.dynamodbName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-dynamodbName
   codeBuild:
     Value:
       Fn::GetAtt: [codebuild, Outputs.codeBuildName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-codeBuild
   codeBuildArn:
     Value:
       Fn::GetAtt: [codebuild, Outputs.codeBuildArn]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-codeBuildArn
   gitHubProjectName:
     Value:
       Fn::GetAtt: [codebuild, Outputs.gitHubProjectName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-gitHubProjectName
   gitHubRepoUrl:
     Value:
       Fn::GetAtt: [codebuild, Outputs.gitHubRepoUrl]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-gitHubRepoUrl
   gitHubRepoName:
     Value:
       Fn::GetAtt: [codebuild, Outputs.gitHubRepoName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-gitHubRepoName
   artifactFileName:
     Value:
       Fn::GetAtt: [codebuild, Outputs.artifactFileName]
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-artifactFileName
