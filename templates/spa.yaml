@@ -224,7 +224,7 @@ Outputs:
       Fn::GetAtt: [api, Outputs.apiResourceName]
     Export:
       Name:
-        Fn::Sub: $(AWS::StackName}-apiResourceName
+        Fn::Sub: ${AWS::StackName}-apiResourceName
   sqsName:
     Value:
       Fn::GetAtt: [sqs, Outputs.sqsName]
